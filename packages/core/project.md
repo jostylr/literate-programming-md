@@ -25,7 +25,7 @@ This is an async function and so it initially returns a promise.
     const commonmark = require('commonmark');
     const Promuse = require('bluebird');
    
-    module.exports = function makeTranspiler (options) {
+    module.exports = function makeTranspiler (options = {} ) {
         _"merge options"
         
         async function parser (text, loader) {
@@ -102,9 +102,84 @@ name of the block if applicable.
 ## Parser
 
 
-## Merge Options
+## Options
 
-This 
+This defines and extends (from the passed in options) the options available.
+This includes the commands, directives, subcommands, and special symbols. 
+
+Don't use destructuring because we want to augment commands, directives, and
+subcommand. 
+
+    _"merge | sub TYPE, commands, DEFAULT, _'Default Commands' "
+    _"merge | sub TYPE, directives, DEFAULT, _'Default directives' "
+    _"merge | sub TYPE, subcommands, DEFAULT, _'Default subcommands' "
+    
+    if (options.commands) {
+        _"merge"
+    }
+
+    const directives = {
+    }
+
+    if (options.directives) {
+
+    }
+
+    const loader = options.loader || _"loader";
+
+    const quotes = options.quotes || ['"', "'", "`"];
+    const underscore = options.underscore || "
+    const pipe = options.pipe || "|";
+    const colon = options.colon || ":";
 
 
+
+### Merge
+
+This does the merging. It is generically written so we can apply to commands,
+directives, and subcommands. 
+
+    const TYPE = { DEFAULT };
+
+    if (options.TYPE) {
+        for (let name in options.TYPE) {
+            TYPE[name] = options.TYPE[name];
+        }
+    }
+
+
+### Default Commands
+
+    sub : _"commands::sub",
+    trim, split, join, wrap
+
+
+
+### Default Directives
+
+    save : _"directives::save",
+    load : _"directives::load"
+
+
+### Default Subcommands
+
+    echo : _"subcommands::echo"
+
+
+
+### Loader
+
+This is a default function for loading. Generally this really needs to be
+replaced, but in the absence of it, it will log the request and return the
+promise that evaluates in one second an empty text item. 
+
+In general, the loader is responsible for loading text from
+other resources, usually in an asynchronous fashion. This is why the timeout,
+to simulate the async nature. 
+
+
+    function logLoader (request) {
+        console.log("Request for " + request + " will not be fulfilled.  Returning empty string. ");
+        return Promise.delay(1000, "");
+    }
 
