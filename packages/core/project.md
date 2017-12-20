@@ -52,6 +52,13 @@ This is an async function and so it initially returns a promise.
     };
 
 
+* [index.js](# "save:") This is the main entry point of the module.
+* [commands](commands.md "load:")
+* [directives](directives.md "load:")
+* [subcommands](subcommands.md "load:")
+
+
+
 Decided to start using Map object. Probably not a great idea. To serialize,
 etc., use https://github.com/JSON8/JSON8  
 
@@ -110,7 +117,7 @@ This includes the commands, directives, subcommands, and special symbols.
 Don't use destructuring because we want to augment commands, directives, and
 subcommand. 
 
-    _"merge | sub TYPE, commands, DEFAULT, _'Default Commands' "
+    _"merge | sub TYPE, commands, DEFAULT, _'Default Commands | objblocks commands, com | compile' "
     _"merge | sub TYPE, directives, DEFAULT, _'Default directives' "
     _"merge | sub TYPE, subcommands, DEFAULT, _'Default subcommands' "
     
@@ -150,21 +157,19 @@ directives, and subcommands.
 
 ### Default Commands
 
-    sub : _"commands::sub",
-    trim, split, join, wrap
+    sub, trim, split, join, wrap, log 
+
 
 
 
 ### Default Directives
 
-    save : _"directives::save",
-    load : _"directives::load"
+    save, load, pipe
 
 
 ### Default Subcommands
 
-    echo : _"subcommands::echo"
-
+    echo
 
 
 ### Loader
@@ -182,4 +187,50 @@ to simulate the async nature.
         console.log("Request for " + request + " will not be fulfilled.  Returning empty string. ");
         return Promise.delay(1000, "");
     }
+
+
+## Object Blocks
+
+This takes in a string of names and returns something that should have the
+blocks replaced with blocks to evaluate. If a filename is provided then that
+is used. 
+
+    function (input, args) {
+        let fname = args[0] || '';
+        let bp = (_'function boilerplate')(input, fname);
+        
+        const ret = input.
+            split(",").
+            map(a => a.trim()).
+            map(a => a + ':' + bp(a)).
+            join(",");
+
+        console.log(ret);
+
+       return ret;
+
+    }
+
+[objblocks](# "define:")
+
+
+### Function boilerplate
+
+This creates a basic structure boilerplate function. The creation function
+takes in the fname and produces a function that takes in the input and creates
+the boilerplate plus a call to the block storage. Basically, it creates
+something like 
+`trim --->  trim : function commandsTrim (input) {_"commands:trim"}`
+
+    function (file) {
+        switch (file) {
+        case "commands" : 
+        return _"commands::boilerplate"
+        case "directives" :
+        return _"directives::boilerplate"
+        case "subcommands" :
+        return _"subcommands::boilerplate"
+        
+    }
+
 
